@@ -1,0 +1,10 @@
+curl --request POST \
+  --url http://localhost:8080/v2/process-instances \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "processDefinitionId": "leave-request",
+    "variables": {
+      "employeeName": "Ravi",
+      "days": 3
+    }
+  }'

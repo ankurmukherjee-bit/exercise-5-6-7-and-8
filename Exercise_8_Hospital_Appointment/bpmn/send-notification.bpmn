@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+ xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+ xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+ xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+ xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+ id="Definitions_SendNotification" targetNamespace="http://bpmn.io/schema/bpmn">
+
+ <bpmn:process id="send-notification" name="Send Notification" isExecutable="true">
+  <bpmn:startEvent id="Start_Notification" name="Notification requested">
+   <bpmn:outgoing>Flow_Start_Send</bpmn:outgoing>
+  </bpmn:startEvent>
+
+  <bpmn:serviceTask id="Task_SendTelegram" name="Send Telegram message">
+   <bpmn:extensionElements>
+    <zeebe:taskDefinition type="io.camunda:connector" retries="3"/>
+    <zeebe:ioMapping>
+     <zeebe:input target="connectorId" source="io.camunda:connector-rest"/>
+     <zeebe:input target="method" source="POST"/>
+     <zeebe:input target="url" source="= &quot;https://api.telegram.org/bot{{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage&quot;"/>
+     <zeebe:input target="headers" source="= { &quot;Content-Type&quot;: &quot;application/json&quot; }"/>
+     <zeebe:input target="body" source="= { &quot;chat_id&quot;: recipientId, &quot;text&quot;: messageText }"/>
+    </zeebe:ioMapping>
+   </bpmn:extensionElements>
+   <bpmn:incoming>Flow_Start_Send</bpmn:incoming>
+   <bpmn:outgoing>Flow_Send_End</bpmn:outgoing>
+  </bpmn:serviceTask>
+
+  <bpmn:endEvent id="End_NotificationSent" name="Notification sent">
+   <bpmn:incoming>Flow_Send_End</bpmn:incoming>
+  </bpmn:endEvent>
+
+  <bpmn:sequenceFlow id="Flow_Start_Send" sourceRef="Start_Notification" targetRef="Task_SendTelegram"/>
+  <bpmn:sequenceFlow id="Flow_Send_End" sourceRef="Task_SendTelegram" targetRef="End_NotificationSent"/>
+ </bpmn:process>
+
+ <bpmndi:BPMNDiagram id="Diagram_SendNotification">
+  <bpmndi:BPMNPlane id="Plane_SendNotification" bpmnElement="send-notification">
+   <bpmndi:BPMNShape id="Start_Notification_di" bpmnElement="Start_Notification"><dc:Bounds x="150" y="162" width="36" height="36"/></bpmndi:BPMNShape>
+   <bpmndi:BPMNShape id="Task_SendTelegram_di" bpmnElement="Task_SendTelegram"><dc:Bounds x="250" y="140" width="170" height="80"/></bpmndi:BPMNShape>
+   <bpmndi:BPMNShape id="End_NotificationSent_di" bpmnElement="End_NotificationSent"><dc:Bounds x="490" y="162" width="36" height="36"/></bpmndi:BPMNShape>
+   <bpmndi:BPMNEdge id="Flow_Start_Send_di" bpmnElement="Flow_Start_Send"><di:waypoint x="186" y="180"/><di:waypoint x="250" y="180"/></bpmndi:BPMNEdge>
+   <bpmndi:BPMNEdge id="Flow_Send_End_di" bpmnElement="Flow_Send_End"><di:waypoint x="420" y="180"/><di:waypoint x="490" y="180"/></bpmndi:BPMNEdge>
+  </bpmndi:BPMNPlane>
+ </bpmndi:BPMNDiagram>
+</bpmn:definitions>

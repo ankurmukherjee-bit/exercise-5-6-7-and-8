@@ -1,0 +1,7 @@
+{
+  "patientId": "123456789",
+  "patientName": "Aarav Kumar",
+  "department": "Cardiology",
+  "preferredSlot": "2026-11-12 10:30",
+  "bookedCount": 12
+}

@@ -1,0 +1,111 @@
+{
+  "info": {
+    "_postman_id": "e7c4d1b2-6a12-4f45-9a31-9e1f2c3d4a55",
+    "name": "Leave Application System API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "API collection for the SRM Leave Application System."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "leaveId",
+      "value": "1"
+    },
+    {
+      "key": "employeeEmail",
+      "value": "alice@example.com"
+    }
+  ],
+  "item": [
+    {
+      "name": "Submit Leave",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"employeeName\": \"Alice\",\n  \"employeeEmail\": \"alice@example.com\",\n  \"leaveType\": \"ANNUAL\",\n  \"startDate\": \"2026-11-10\",\n  \"endDate\": \"2026-11-12\",\n  \"reason\": \"Personal leave\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/leaves"
+      }
+    },
+    {
+      "name": "List My Requests",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/leaves?employeeEmail={{employeeEmail}}"
+      }
+    },
+    {
+      "name": "Pending Manager Requests",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/leaves/pending"
+      }
+    },
+    {
+      "name": "Get Leave Balance",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/leaves/balance?employeeEmail={{employeeEmail}}"
+      }
+    },
+    {
+      "name": "Approve Leave",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"approved\": true,\n  \"comment\": \"Approved. Please coordinate handover.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/leaves/{{leaveId}}/decision"
+      }
+    },
+    {
+      "name": "Reject Leave",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"approved\": false,\n  \"comment\": \"Unable to approve due to team coverage.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/leaves/{{leaveId}}/decision"
+      }
+    }
+  ]
+}

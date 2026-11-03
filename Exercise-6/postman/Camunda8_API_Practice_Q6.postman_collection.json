@@ -1,0 +1,51 @@
+{
+  "info": {
+    "_postman_id": "d6a8b40e-7d2f-4a1e-9c10-8b45b2d6c006",
+    "name": "Camunda 8 API Practice - Question 6",
+    "description": "Starts the leave-request process using the REST API endpoint specified in the practice question.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Start Leave Request Process",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"processDefinitionId\": \"leave-request\",\n  \"variables\": {\n    \"employeeName\": \"Ravi\",\n    \"days\": 3\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/v2/process-instances",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "v2",
+            "process-instances"
+          ]
+        },
+        "description": "Deploy the BPMN process first, then send this request. Save the returned processInstanceKey for verification in Operate."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ]
+}

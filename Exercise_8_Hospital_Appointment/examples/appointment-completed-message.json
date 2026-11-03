@@ -1,0 +1,8 @@
+{
+  "name": "appointment-completed",
+  "correlationKey": "123456789",
+  "timeToLive": 60000,
+  "variables": {
+    "patientId": "123456789"
+  }
+}

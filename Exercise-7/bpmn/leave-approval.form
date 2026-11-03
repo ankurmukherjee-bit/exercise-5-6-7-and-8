@@ -1,0 +1,20 @@
+{
+  "id": "leave-approval",
+  "type": "default",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "components": [
+    {
+      "label": "Approve this request",
+      "type": "checkbox",
+      "key": "approved",
+      "defaultValue": false
+    },
+    {
+      "label": "Comment",
+      "type": "textarea",
+      "key": "managerComment",
+      "description": "Optional manager comment"
+    }
+  ]
+}

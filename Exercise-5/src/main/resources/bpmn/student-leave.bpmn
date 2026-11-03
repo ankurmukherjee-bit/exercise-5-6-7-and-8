@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions
+    xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+    xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+    xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+    xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    id="Definitions_StudentLeave"
+    targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="student-leave" name="Student Leave Application" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_LeaveRequested" name="Leave requested">
+      <bpmn:outgoing>Flow_Start_Validate</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:serviceTask id="Task_ValidateLeave" name="Validate leave request">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="validate-leave" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Start_Validate</bpmn:incoming>
+      <bpmn:outgoing>Flow_Validate_Route</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:exclusiveGateway id="Gateway_RouteLeave" name="Route leave request" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_Validate_Route</bpmn:incoming>
+      <bpmn:outgoing>Flow_Auto_Merge</bpmn:outgoing>
+      <bpmn:outgoing>Flow_FA_Approval</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Invalid_Merge</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:userTask id="Task_FAApproval" name="Faculty Advisor approval">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formId="fa-approval-form" bindingType="latest" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_FA_Approval</bpmn:incoming>
+      <bpmn:outgoing>Flow_FA_Merge</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:exclusiveGateway id="Gateway_Merge" name="Continue to notification" gatewayDirection="Converging">
+      <bpmn:incoming>Flow_Auto_Merge</bpmn:incoming>
+      <bpmn:incoming>Flow_FA_Merge</bpmn:incoming>
+      <bpmn:incoming>Flow_Invalid_Merge</bpmn:incoming>
+      <bpmn:outgoing>Flow_Merge_Notify</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:serviceTask id="Task_NotifyStudent" name="Notify student">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="notify-student" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Merge_Notify</bpmn:incoming>
+      <bpmn:outgoing>Flow_Notify_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_LeaveComplete" name="Leave request completed">
+      <bpmn:incoming>Flow_Notify_End</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Start_Validate" sourceRef="StartEvent_LeaveRequested" targetRef="Task_ValidateLeave" />
+    <bpmn:sequenceFlow id="Flow_Validate_Route" sourceRef="Task_ValidateLeave" targetRef="Gateway_RouteLeave" />
+
+    <bpmn:sequenceFlow id="Flow_Auto_Merge" name="Valid and up to 2 days"
+                      sourceRef="Gateway_RouteLeave" targetRef="Gateway_Merge">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=valid and leaveDays &lt;= 2</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_FA_Approval" name="Valid and more than 2 days"
+                      sourceRef="Gateway_RouteLeave" targetRef="Task_FAApproval">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=valid and leaveDays &gt; 2</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_Invalid_Merge" name="Invalid dates"
+                      sourceRef="Gateway_RouteLeave" targetRef="Gateway_Merge">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=not(valid)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_FA_Merge" sourceRef="Task_FAApproval" targetRef="Gateway_Merge" />
+    <bpmn:sequenceFlow id="Flow_Merge_Notify" sourceRef="Gateway_Merge" targetRef="Task_NotifyStudent" />
+    <bpmn:sequenceFlow id="Flow_Notify_End" sourceRef="Task_NotifyStudent" targetRef="EndEvent_LeaveComplete" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_StudentLeave">
+    <bpmndi:BPMNPlane id="BPMNPlane_StudentLeave" bpmnElement="student-leave">
+      <bpmndi:BPMNShape id="StartEvent_LeaveRequested_di" bpmnElement="StartEvent_LeaveRequested">
+        <dc:Bounds x="120" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ValidateLeave_di" bpmnElement="Task_ValidateLeave">
+        <dc:Bounds x="210" y="160" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_RouteLeave_di" bpmnElement="Gateway_RouteLeave" isMarkerVisible="true">
+        <dc:Bounds x="415" y="175" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_FAApproval_di" bpmnElement="Task_FAApproval">
+        <dc:Bounds x="545" y="300" width="180" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Merge_di" bpmnElement="Gateway_Merge" isMarkerVisible="true">
+        <dc:Bounds x="790" y="175" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_NotifyStudent_di" bpmnElement="Task_NotifyStudent">
+        <dc:Bounds x="900" y="160" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_LeaveComplete_di" bpmnElement="EndEvent_LeaveComplete">
+        <dc:Bounds x="1120" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_Start_Validate_di" bpmnElement="Flow_Start_Validate">
+        <di:waypoint x="156" y="200" /><di:waypoint x="210" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Validate_Route_di" bpmnElement="Flow_Validate_Route">
+        <di:waypoint x="360" y="200" /><di:waypoint x="415" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Auto_Merge_di" bpmnElement="Flow_Auto_Merge">
+        <di:waypoint x="465" y="200" /><di:waypoint x="790" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FA_Approval_di" bpmnElement="Flow_FA_Approval">
+        <di:waypoint x="440" y="225" /><di:waypoint x="440" y="340" /><di:waypoint x="545" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FA_Merge_di" bpmnElement="Flow_FA_Merge">
+        <di:waypoint x="725" y="340" /><di:waypoint x="815" y="340" /><di:waypoint x="815" y="225" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Invalid_Merge_di" bpmnElement="Flow_Invalid_Merge">
+        <di:waypoint x="440" y="175" /><di:waypoint x="440" y="90" /><di:waypoint x="815" y="90" /><di:waypoint x="815" y="175" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Merge_Notify_di" bpmnElement="Flow_Merge_Notify">
+        <di:waypoint x="840" y="200" /><di:waypoint x="900" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Notify_End_di" bpmnElement="Flow_Notify_End">
+        <di:waypoint x="1050" y="200" /><di:waypoint x="1120" y="200" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

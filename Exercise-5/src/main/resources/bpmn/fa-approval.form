@@ -1,0 +1,32 @@
+{
+  "components": [
+    {
+      "label": "Student details",
+      "type": "text",
+      "text": "Student: {{studentName}}  |  Registration No.: {{regNo}}\\nLeave dates: {{fromDate}} to {{toDate}}\\nReason: {{reason}}\\nNumber of days: {{leaveDays}}",
+      "layout": {
+        "row": "Row_StudentDetails"
+      }
+    },
+    {
+      "label": "Approve this leave",
+      "type": "checkbox",
+      "key": "approved",
+      "defaultValue": false,
+      "description": "Tick this box to approve the leave request."
+    },
+    {
+      "label": "Faculty Advisor remarks",
+      "type": "textarea",
+      "key": "remarks",
+      "description": "Enter the reason for approval or rejection.",
+      "validate": {
+        "required": true
+      }
+    }
+  ],
+  "type": "default",
+  "id": "fa-approval-form",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0"
+}
